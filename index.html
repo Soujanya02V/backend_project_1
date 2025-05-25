@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +14,7 @@
         <form class="shorten-form" id="shorten-form">
             <div>
                 <label for="shortCode">ENTER URL</label>
-                <input type="text" name="url" id='shortCode'required> 
+                <input type="text" name="url" id='url'required> 
 
             </div>
             <div>
@@ -28,6 +29,26 @@
         <ul id="shortened-urls"></ul>
     </div>
     <script>
+
+        const fetchShortenedUrl = async()=>{
+            const response = await fetch("/links");
+            const links = await response.json();
+            console.log("links",links)
+
+            const list = document.getElementById("shortened-urls");
+            list.innerHTML = "";
+
+            const entries = Object.entries(links).reverse().slice(0,3);
+
+            for (const [shortCode, url] of entries){
+                const li = document.createElement('li');
+                li.innerHTML = `<a href="/${shortCode}" target="_blank">$
+                    ${window.location.origin}/${shortCode}</a> - ${url}`
+                    list.appendChild(li);
+            }
+
+
+        }
          document.getElementById('shorten-form')
          .addEventListener('submit',async (event) => {
             event.preventDefault();
@@ -37,6 +58,7 @@
             const shortCode = formData.get('shortCode')
             console.log(url, shortCode)
 
+
             try{
                 const response = await fetch("/shorten", {
                     method : "POST",
@@ -44,6 +66,7 @@
                     body : JSON.stringify({url,shortCode})
                 });
                 if(response.ok){
+
                     alert("form submitted successfully");
                     event.target.reset()
                 }else{
@@ -57,6 +80,9 @@
 
 
          })
+
+
+         fetchShortenedUrl();
     </script>
 </body>
 </html>
