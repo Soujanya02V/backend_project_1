@@ -1,7 +1,6 @@
 //creating server and serving html and css files
 //both index.html and style.css files must be placed in another folder "public"
 // a folder named "data" should be created first to save logs
-
 import { readFile } from "fs/promises";
 import {createServer} from "http";
 import crypto from "crypto";
@@ -38,7 +37,7 @@ const loadLinks = async () => {
 }
 
 const saveLinks = async (links)=>{
-    await writeFile(DATA_FILE, JSON.stringify(links))
+    await writeFile(DATA_FILE, JSON.stringify(links, null, 2))
 }
 const server = createServer(async (req,res)=> {
     console.log(req.url)
@@ -55,6 +54,21 @@ const server = createServer(async (req,res)=> {
             path.join("public","style.css"),   "text/css")
           
 
+        }else if(req.url === "/links"){
+            const links = await loadLinks();
+            res.writeHead(200,{"Content-Type":"application/json"});
+            return res.end(JSON.stringify(links));
+
+        }else{
+            const links = await loadLinks();
+            const shortCode = req.url.slice(1);
+            console.log("link redirect", req.url);
+            if(links[shortCode]){
+                res.writeHead(302,{location : links[shortCode]});
+                return res.end()
+            }
+                res.writeHead(404,{"Content-Type" : "text/plain"});
+                return res.end("url not found")
         }
     }
 
@@ -67,7 +81,7 @@ const server = createServer(async (req,res)=> {
         )
         req.on('end',async () =>{
             console.log(body);
-            const {url,shorCode} = JSON.parse(body)
+            const {url,shortCode} = JSON.parse(body)
 
             if(!url){
                 res.writeHead(404,{"Content-Type":"text/plain"});
@@ -75,7 +89,7 @@ const server = createServer(async (req,res)=> {
             }
 
 
-            const finalShortCode = shorCode || crypto.randomBytes(4).toString("hex");
+            const finalShortCode = shortCode || crypto.randomBytes(4).toString("hex");
             if(links[finalShortCode]){
                 res.writeHead(404,{"Content-Type":"text/plain"})
                return res.end("short code already exists give another one") 
