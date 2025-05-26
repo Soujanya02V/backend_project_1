@@ -1,6 +1,8 @@
 //creating server and serving html and css files
 //both index.html and style.css files must be placed in another folder "public"
-// a folder named "data" should be created first to save logs
+// a folder named "data" should be created 
+//in data folder another file will be created to store logs
+
 import { readFile } from "fs/promises";
 import {createServer} from "http";
 import crypto from "crypto";
